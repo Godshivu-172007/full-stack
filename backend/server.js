@@ -11,12 +11,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const MONGO_URI = process.env.MONGO_URI;
-
-if (!MONGO_URI) {
-    console.error("❌ ERROR: MONGO_URI is missing! Check your .env file.");
-    process.exit(1);
-}
+const DEFAULT_MONGO_URI = "mongodb+srv://Bhushan17:Bak8459589302@backend.qgtwa.mongodb.net/";
+const MONGO_URI = process.env.MONGO_URI || DEFAULT_MONGO_URI;
 
 const client = new MongoClient(MONGO_URI, { tls: true });
 
