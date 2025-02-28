@@ -1,0 +1,101 @@
+import { useEffect, useState } from "react";
+import "./App.css";
+import axios from "axios";
+
+// ✅ Define the backend API URL
+// const API_BASE_URL = "https://full-stack-mo36.onrender.com";
+
+function App() {
+  const [jokes, setJokes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // ✅ Function to fetch jokes from the backend
+  const fetchJokes = (isRefresh = false) => {
+    setLoading(true);
+    setError(null);
+
+    axios
+      .get(`/api/jokes`)
+      .then((response) => {
+        console.log("✅ Jokes received:", response.data);
+        setJokes(response.data);
+        localStorage.setItem("jokes", JSON.stringify(response.data)); // ✅ Save jokes to local storage
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("❌ Error fetching jokes:", error);
+        setError("Failed to fetch jokes. Please try again later.");
+        setLoading(false);
+      });
+
+    // ✅ If it's a refresh action, force reload jokes
+    if (isRefresh) {
+      console.log("🔄 Refreshing jokes...");
+    }
+  };
+
+  useEffect(() => {
+    const storedJokes = localStorage.getItem("jokes");
+
+    if (storedJokes) {
+      console.log("✅ Loaded jokes from local storage");
+      setJokes(JSON.parse(storedJokes));
+      setLoading(false);
+    } else {
+      fetchJokes();
+    }
+  }, []);
+
+  return (
+    <>
+      <h1>✨ Bhushan Full Stack Project 🧿 || 🧿 For JOKES ✨</h1>
+
+      <button 
+        onClick={() => fetchJokes(true)} 
+        style={{
+          padding: "10px 20px",
+          margin: "10px 0",
+          fontSize: "16px",
+          cursor: "pointer",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          transition: "background 0.3s",
+        }}
+        onMouseOver={(e) => (e.target.style.backgroundColor = "#0056b3")}
+        onMouseOut={(e) => (e.target.style.backgroundColor = "#007bff")}
+      >
+        🔄 Refresh Jokes
+      </button>
+
+      {loading ? (
+        <p>⏳ Loading jokes...</p>
+      ) : error ? (
+        <p style={{ color: "red" }}>❌ {error}</p>
+      ) : (
+        <>
+          <p>JOKES: {jokes.length}</p>
+          {jokes.map((joke) => (
+            <div
+              key={joke.id}
+              style={{
+                padding: "10px",
+                margin: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "5px",
+                backgroundColor: "#f9f9f9",
+              }}
+            >
+              <h3>{joke.title}</h3>
+              <p>{joke.content}</p>
+            </div>
+          ))}
+        </>
+      )}
+    </>
+  );
+}
+
+export default App;
