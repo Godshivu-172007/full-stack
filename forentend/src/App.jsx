@@ -3,8 +3,6 @@ import "./App.css";
 import axios from "axios";
 
 
- const API_BASE_URL = "https://full-stack-mo36.onrender.com";
-
 function App() {
   const [jokes, setJokes] = useState([]);
   const [persons, setPersons] = useState([]);
