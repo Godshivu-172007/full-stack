@@ -3,18 +3,23 @@ import cors from 'cors';
 import axios from 'axios';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
-import readline from 'readline';
 
-dotenv.config();
+dotenv.config(); // Load .env variables
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(cors()); // Allow frontend access
+app.use(express.json()); // Parse JSON requests
 
-const DEFAULT_MONGO_URI = "mongodb+srv://Bhushan17:Bak8459589302@backend.qgtwa.mongodb.net/";
-const MONGO_URI = process.env.MONGO_URI || DEFAULT_MONGO_URI;
+// 🔹 Use .env MONGO_URI, fallback to MongoDB Atlas URL
+const MONGO_URI = process.env.MONGO_URI ;
 
-const client = new MongoClient(MONGO_URI, { tls: true });
+// ✅ MongoDB Client
+const client = new MongoClient(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    tls: true,
+    tlsAllowInvalidCertificates: false, // Prevent invalid TLS errors
+});
 
 // ✅ Connect to MongoDB
 async function connectToMongoDB() {
@@ -24,52 +29,6 @@ async function connectToMongoDB() {
     } catch (err) {
         console.error("❌ MongoDB Connection Error:", err);
         process.exit(1);
-    }
-}
-
-// ✅ Function to prompt user input
-function promptUser(question) {
-    return new Promise((resolve) => {
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-        });
-
-        rl.question(question, (answer) => {
-            rl.close();
-            resolve(answer);
-        });
-    });
-}
-
-// ✅ Function to collect and insert person data
-async function collectAndInsertPerson() {
-    try {
-        console.log("\n📌 Enter new person details:");
-        const name = await promptUser("Enter name: ");
-        const marks = await promptUser("Enter marks: ");
-        const age = await promptUser("Enter age: ");
-        const dob = await promptUser("Enter Date of Birth (YYYY-MM-DD): ");
-
-        if (!name || !marks || !age || !dob) {
-            console.log("❌ Error: All fields are required!");
-            return;
-        }
-
-        const newPerson = { 
-            name, 
-            marks: Number(marks), 
-            age: Number(age), 
-            dob 
-        };
-
-        const db = client.db("INDEX");
-        const personCollection = db.collection("PERSON");
-
-        const result = await personCollection.insertOne(newPerson);
-        console.log(`✅ Person added successfully! ID: ${result.insertedId}`);
-    } catch (error) {
-        console.error("❌ Error adding person:", error);
     }
 }
 
@@ -136,7 +95,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
     await connectToMongoDB();
-
-    // ✅ Ask user to input data after server starts
-    await collectAndInsertPerson();
 });
